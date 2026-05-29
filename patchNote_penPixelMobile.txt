@@ -2,6 +2,7 @@
 v0.00.1 -> Lancement
 v0.00.2 -> Update Interface
 v0.00.3 -> Refonte écran selectDraw
+v0.01.0 -> Refonte écran Draw
 
 
 EN COURS : Changement d'écran
@@ -11,6 +12,8 @@ BUG A CORRIGER : le remplacement l'icone au démarage
 ** Pensez à builder en HTML pour le tester sur navigateur + mobile
 
 A FAIRE : 
+- transistion commencement peinture nom + nombre de pixel en animation texte
+- menu pause
 - l'oeil magique, survole la minigrid pendant X seconde puis marque
 - Marquage minigrille + grille intéractive limité en nombre
 - musique et effet sonore 

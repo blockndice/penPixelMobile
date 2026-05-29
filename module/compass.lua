@@ -38,40 +38,30 @@ function compass.resetCounters()
     end
 end
 
--- Ajoute un pixel coloré verticalement (pour les lignes)
-function compass.randowX(x, size, space)
+-- Ajoute un repère coloré à gauche de la mini-carte (une ligne par row)
+function compass.randowX(x, size, space, baseY)
     compteurX = compteurX + 1
-    local y = 20 + (compteurX - 1) * space
+    local y = (baseY or 20) + (compteurX - 1) * space
 
     local color = generateColor(compteurX)
-
     local rect = display.newRect(x, y, size / 2, size)
     rect:setFillColor(unpack(color))
-    
-    -- 💡 Bordure gris clair
     rect.strokeWidth = 1
-    -- rect:setStrokeColor(0.8, 0.8, 0.8)
     rect:setStrokeColor(0, 0, 0)
-
     rect.anchorX, rect.anchorY = 0, 0
     xGroup:insert(rect)
 end
 
--- Ajoute un pixel coloré horizontalement (pour les colonnes)
-function compass.randowY(y, size, space)
+-- Ajoute un repère coloré au-dessus de la mini-carte (une colonne par col)
+function compass.randowY(y, size, space, baseX)
     compteurY = compteurY + 1
-    local x = 17 + (compteurY - 1) * space
+    local x = (baseX or 17) + (compteurY - 1) * space
 
     local color = generateColor(compteurY)
-
     local rect = display.newRect(x, y, size, size / 2)
     rect:setFillColor(unpack(color))
-    
-    -- 💡 Bordure gris clair
     rect.strokeWidth = 1
-    -- rect:setStrokeColor(0.8, 0.8, 0.8)
     rect:setStrokeColor(0, 0, 0)
-
     rect.anchorX, rect.anchorY = 0, 0
     yGroup:insert(rect)
 end

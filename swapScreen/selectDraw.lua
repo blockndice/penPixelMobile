@@ -254,7 +254,7 @@ function scene:create(event)
 
     -- Titre
     local title = display.newText({
-        parent = sceneGroup, text = "GALERIE DE DESSINS",
+        parent = sceneGroup, text = "SÉLECTIONNE UNE PEINTURE",
         x = display.contentCenterX, y = 36,
         font = native.systemFontBold, fontSize = 22,
     })
