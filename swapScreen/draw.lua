@@ -16,6 +16,9 @@ function scene:create(event)
     self.gridRects = {}
     self.carreList = {}
 
+    local letterbox   = require("module.letterbox")
+    letterbox.draw(sceneGroup)
+
     local letPuzzle   = composer.getVariable("selectedPuzzle")
     local selectedPage = composer.getVariable("selectedPage") or 1
     local selectMAP   = require("data.drawMap" .. selectedPage)

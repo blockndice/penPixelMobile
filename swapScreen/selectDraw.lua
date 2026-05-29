@@ -176,6 +176,9 @@ end
 function scene:create(event)
     sceneGroup = self.view
 
+    local letterbox = require("module.letterbox")
+    letterbox.draw(sceneGroup)
+
     -- Bouton retour (haut gauche)
     local backBtn = display.newText({
         parent = sceneGroup,

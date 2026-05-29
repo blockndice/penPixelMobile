@@ -1,61 +1,7 @@
 -- DEVELLOPPEUMENT 
-v0.01.0 -> Afficher un puzzle
-v0.02.0 -> Moduler les puzzle et data associés
-v0.03.0 -> Afficher un grille vierge + ajouter des pixels de couleur
-v0.03.1 -> Hotfixe -> Remplacer les string color par des variables color
-v0.04.0 -> Selectionner un couleur + changer de couleur avec la molette
-v0.05.0 -> Retirer une couleur avec le clic long
-v0.06.0 -> Ajouter un compteur dynamique des pixel totaux et restant
-v0.06.1 -> Ajouter un compteur dynamique des couleur restant à posé
-v0.06.2 -> Mise à jours des couleurs
-v0.06.3 -> Stocker la valeur de la couleur lors d'un suppression
-v0.07.0 -> Affichage dynamique des pixel de couleur finaliser
-v0.07.1 -> Aucun pixel est ajouter lorsque le compteur est à 0
-v0.07.2 -> ! HOTFIX ! lorsqu'on pose un pixel de couleur sur un autre, incremente l'ancien pixel de couleur 
-v0.08.0 -> Condition de fin puzzle + devMod
-v0.08.1 -> Soluce Mode * 1/3 *
-v0.08.2 -> Soluce Mode * 2/3 *
-v0.08.3 -> Soluce Mode * 3/3 *
-v0.09.0 -> Soluce Mode polish l'animation arc-en-ciel
-v0.10.0 -> Toggle bouton delete + icone sur bureau
-v0.10.1 -> Déplacer l'ancrage de penIcon en bas à gauche
-v0.10.2 -> ! HOTFIX ! Toggle bouton delete + icone sur bureau * résolue *
-v0.10.3 -> ! HOTFIX ! icone sur bureau résolu avec la molette et la selection de couleur
-v0.10.4 -> * BUG EN PAUSE * le remplacement l'icone au démarage
-v0.10.5 -> Réorganisation des fichiers
-v0.10.6 -> Réorganisation des fichiers pour le swapScreen
-v0.10.7 -> Ecran titre
-v0.10.8 -> Ecran selection part 1 -> UI selection dessin + page
-v0.10.9 -> Ecran selection part 2 -> link les dessin avec le tableau de selection
-v0.10.10 -> Ecran selection part 3 -> Afficher le dessin 
-v0.11.0 -> Ecran selection Terminé -> Transition 
-v0.11.1 -> Bonton Retour part 1 -> affichez le bouton
-v0.11.1.1 -> Bonton Retour part 2 -> Bug syntaxe goToScene et removeScene
-v0.11.1.2 -> Bonton Retour part 3 -> Bug syntaxe goToScene et removeScene 
-v0.11.1.3 -> ! PAUSE ! Bonton Retour part 4 -> Bug syntaxe goToScene et removeScene 
-v0.12.0 -> ajout de puzzle page 1 de la demo TIC-80
-v0.12.1 -> changement de page dynamique -> ajout du fichier drawMap1 et drawMap2
-v0.12.2 -> Ajustement des miniature quelque soit la taille des puzzle
-v0.12.3 -> Ajout de puzzle page 2 de la demo TIC-80
-v0.12.4 -> ! UPDATE ! drawMap2.lua
-v0.12.5 -> ! HOTFIX ! Affiche correctement un puzzle de la page 2 et au delà
-v0.13.0 -> ! REPRISE ! Bonton Retour part 5 -> Bonton Soluce, Fin, Retour feature réussir
-v0.13.1 -> ! En cours ! Bonton Retour part 6 -> résolution de bug
-v0.14.0 -> new drawMap3.lua -> page 3 Puzzle
-v0.14.1 -> update drawMap3.lua -> add icone#1 + bird#1 
-v0.15.0 -> ! HOTFIX ! bug du patch v0.11.1.3 résolue
-v0.15.1 -> ! UPDATE ! ajustement taille et position de tous les puzzle lors du dessin
-v0.15.2 -> start puzzle fish#1 
-v0.16.0 -> new puzzle fish#1 
-v0.17.0 -> Repère colonne / ligne part 1 -> module et intégration
-v0.17.1 -> Repère colonne / ligne part 2 -> reset des valeurs
-v0.17.1.1 -> Repère colonne / ligne part 3 -> essaie affichage
-v0.17.2 -> Repère colonne / ligne part 4 -> Repère de couleur sur la minigrille
-v0.17.2.1 -> Repère colonne / ligne part 5 -> prérequis repère grille principale
-v0.17.3 -> Repère colonne / ligne part 6 -> pRepère de couleur sur la grille intéractive
-v0.18.0 -> Animation lors qu'un pixel est placé
-v0.18.1 -> Animation lors qu'un pixel est retiré.
-v0.19.0 -> review code
+v0.00.1 -> Lancement
+v0.00.2 -> Update Interface
+
 
 EN COURS : Changement d'écran
 
