@@ -4,6 +4,7 @@ v0.00.2 -> Update Interface
 v0.00.3 -> Refonte écran selectDraw
 v0.01.0 -> Refonte écran Draw
 v0.01.1 -> Repositionnement repère couleur + palette de couleur + info bulle
+v0.02.0 -> Add animation sur le compteur pixel restant + animantion fin de puzzle
 
 
 EN COURS : Changement d'écran
@@ -15,6 +16,7 @@ BUG A CORRIGER : le remplacement l'icone au démarage
 A FAIRE : 
 - transistion commencement peinture nom + nombre de pixel en animation texte
 - menu pause
+- évènement animer durant le dessin
 - l'oeil magique, survole la minigrid pendant X seconde puis marque
 - Marquage minigrille + grille intéractive limité en nombre
 - musique et effet sonore 

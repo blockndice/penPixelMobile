@@ -50,6 +50,9 @@ function scene:create(event)
     local gridBlank   = {}
     local textColorNb = {}
 
+    -- Forward declarations pour que showFinitoMessage capture les variables de grille
+    local gridOffsetX, gridOffsetY, rows, cols, cellSize
+
     -- ─── Victoire ────────────────────────────────────────────────────────────
     local function showFinitoMessage()
         local finitoText = display.newText({
@@ -61,6 +64,11 @@ function scene:create(event)
         })
         finitoText:setFillColor(unpack(C.accent))
         sceneGroup:insert(finitoText)
+
+        animation.grandFinale(
+            gridOffsetX, gridOffsetY,
+            rows, cols, cellSize,
+            map.data.colors, colorMap, sceneGroup)
     end
 
     local function countGridDifferences(g1, g2)
@@ -125,17 +133,18 @@ function scene:create(event)
     end
 
     -- ─── Paramètres grille ───────────────────────────────────────────────────
-    local cellSize = map.data.cellSize
-    local rows     = map.data.Hauteur
-    local cols     = map.data.Largeur
+    -- Affectation des forward declarations (capturées par showFinitoMessage)
+    cellSize = map.data.cellSize
+    rows     = map.data.Hauteur
+    cols     = map.data.Largeur
 
     -- Repositionnement dynamique : utilise l'espace libéré par le panneau droit supprimé
     local leftBound  = offsetX + miniW + 45
     local rightBound = display.contentWidth - 15
     local topBound   = 15
     local botBound   = display.contentHeight - 55
-    local gridOffsetX = math.floor(leftBound + (rightBound - leftBound - cols * cellSize) / 2 + cellSize / 2)
-    local gridOffsetY = math.floor(topBound  + (botBound  - topBound  - rows * cellSize) / 2 + cellSize / 2)
+    gridOffsetX = math.floor(leftBound + (rightBound - leftBound - cols * cellSize) / 2 + cellSize / 2)
+    gridOffsetY = math.floor(topBound  + (botBound  - topBound  - rows * cellSize) / 2 + cellSize / 2)
 
     -- Bornes de la grille
     local gridLeft    = gridOffsetX - cellSize / 2
@@ -213,9 +222,9 @@ function scene:create(event)
     local diffCount2 = pixCountTotal
     local diffCountText = display.newText({
         parent = sceneGroup, text = tostring(diffCount2),
-        x = bubbleCX - 16, y = line2Y, font = native.systemFontBold, fontSize = 22,
+        x = bubbleCX - 22, y = line2Y, font = native.systemFontBold, fontSize = 22,
     })
-    diffCountText.anchorX = 1
+    diffCountText.anchorX = 0.5   -- ancrage centré → scale depuis le milieu
     diffCountText:setFillColor(unpack(C.accent))
 
     local sepLabel = display.newText({
@@ -231,6 +240,7 @@ function scene:create(event)
     pixCountText.anchorX = 0
     pixCountText:setFillColor(unpack(C.sub))
 
+    -- Animation +1 flottant près du compteur restant
     -- ─── État palette ────────────────────────────────────────────────────────
     local currentIndex  = 1
     local drawPixel     = nil
@@ -280,7 +290,8 @@ function scene:create(event)
                 local elapsed = system.getTimer() - rect.touchStartTime
                 local i, j   = rect.i, rect.j
 
-                if elapsed > 300 or deleteButton.isDeleteMode() then
+                local wasErase = elapsed > 300 or deleteButton.isDeleteMode()
+                if wasErase then
                     eraseCell(rect, i, j)
                 else
                     local newColor   = drawPixel
@@ -316,8 +327,19 @@ function scene:create(event)
                     end
                 end
 
+                local prev = diffCount2
                 diffCount2 = countGridDifferences(grid, gridBlank)
                 diffCountText.text = tostring(diffCount2)
+                if not wasErase then
+                    local normalCol = C.accent
+                    if diffCount2 < prev then
+                        animation.pulseText(diffCountText, 1.6, 140,
+                            {0.22, 0.85, 0.40}, normalCol)  -- bonne action → vert
+                    elseif diffCount2 > prev then
+                        animation.shakeText(diffCountText,
+                            {0.92, 0.22, 0.22}, normalCol)  -- mauvaise action → buzzer rouge
+                    end
+                end
                 if diffCount2 == 0 then showFinitoMessage() end
             end
         end
