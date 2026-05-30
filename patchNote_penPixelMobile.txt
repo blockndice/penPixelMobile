@@ -5,6 +5,8 @@ v0.00.3 -> Refonte écran selectDraw
 v0.01.0 -> Refonte écran Draw
 v0.01.1 -> Repositionnement repère couleur + palette de couleur + info bulle
 v0.02.0 -> Add animation sur le compteur pixel restant + animantion fin de puzzle
+v0.02.1 -> Add animation de la palette de couleur (case → boule → envol)
+v0.02.2 -> Correction bug pixel blanc persistant + compteur pixel + bordures letterbox
 
 
 EN COURS : Changement d'écran

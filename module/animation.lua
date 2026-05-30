@@ -8,7 +8,7 @@ function M.fireWork(x, y, color, parentGroup)
     for i = 1, particleCount do
         local particle = display.newCircle(x, y, 10)
         particle:setFillColor(unpack(color))
-        
+
         if parentGroup and parentGroup.insert then
             parentGroup:insert(particle)
         end
@@ -162,27 +162,45 @@ function M.grandFinale(gridOffsetX, gridOffsetY, rows, cols, cellSize, colors, c
     end
 end
 
--- 📳 Vibration buzzer (erreur / incrémentation)
+-- 📳 Vibration buzzer (erreur)
+-- Touche uniquement obj.x — n'interfère jamais avec xScale/yScale
 function M.shakeText(obj, flashColor, normalColor)
     flashColor  = flashColor  or {0.92, 0.22, 0.22}
     normalColor = normalColor or {1, 1, 1}
 
+    -- Annule un pulse en cours (remet le scale à 1)
+    if obj._pulseHandle then
+        transition.cancel(obj._pulseHandle)
+        obj._pulseHandle = nil
+        obj.xScale = 1
+        obj.yScale = 1
+    end
+
+    -- Annule un shake en cours
+    if obj._shakeHandle then
+        transition.cancel(obj._shakeHandle)
+        obj._shakeHandle = nil
+    end
+
+    local ox = obj._baseX or obj.x
+    obj.x = ox
+
     obj:setFillColor(unpack(flashColor))
-    local ox   = obj.x
     local amps = {-9, 9, -7, 7, -5, 5, -3, 3, 0}
     local step = 0
 
     local function nextStep()
         step = step + 1
         if step <= #amps then
-            transition.to(obj, {
+            obj._shakeHandle = transition.to(obj, {
                 time       = 38,
                 x          = ox + amps[step],
                 transition = easing.linear,
                 onComplete = nextStep,
             })
         else
-            obj.x = ox
+            obj.x            = ox
+            obj._shakeHandle = nil
             obj:setFillColor(unpack(normalColor))
         end
     end
@@ -190,29 +208,43 @@ function M.shakeText(obj, flashColor, normalColor)
 end
 
 -- 💥 Pulse centré sur un objet texte avec flash couleur
+-- Touche uniquement xScale/yScale — n'interfère jamais avec obj.x ou anchorX
 function M.pulseText(obj, scaleUp, duration, flashColor, normalColor)
     scaleUp     = scaleUp    or 1.5
     duration    = duration   or 160
     flashColor  = flashColor or {1, 1, 1}
     normalColor = normalColor or {1, 1, 1}
 
-    -- Flash couleur immédiat
+    -- Annule un shake en cours (remet obj.x à sa base)
+    if obj._shakeHandle then
+        transition.cancel(obj._shakeHandle)
+        obj._shakeHandle = nil
+        obj.x = obj._baseX or obj.x
+    end
+
+    -- Annule un pulse en cours
+    if obj._pulseHandle then
+        transition.cancel(obj._pulseHandle)
+        obj._pulseHandle = nil
+    end
+    obj.xScale = 1
+    obj.yScale = 1
+
     obj:setFillColor(unpack(flashColor))
 
-    -- Grossir (depuis le centre grâce à anchorX=0.5)
-    transition.to(obj, {
+    obj._pulseHandle = transition.to(obj, {
         time       = duration,
         xScale     = scaleUp,
         yScale     = scaleUp,
         transition = easing.outQuad,
         onComplete = function()
-            -- Revenir à 1 + restaurer couleur normale
-            transition.to(obj, {
+            obj._pulseHandle = transition.to(obj, {
                 time       = duration,
                 xScale     = 1,
                 yScale     = 1,
                 transition = easing.inQuad,
                 onComplete = function()
+                    obj._pulseHandle = nil
                     obj:setFillColor(unpack(normalColor))
                 end,
             })

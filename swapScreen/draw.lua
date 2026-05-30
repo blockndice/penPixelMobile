@@ -52,6 +52,7 @@ function scene:create(event)
 
     -- Forward declarations pour que showFinitoMessage capture les variables de grille
     local gridOffsetX, gridOffsetY, rows, cols, cellSize
+    local removePaletteItem, restorePaletteItem
 
     -- ─── Victoire ────────────────────────────────────────────────────────────
     local function showFinitoMessage()
@@ -83,9 +84,13 @@ function scene:create(event)
 
     -- ─── Helpers couleur ─────────────────────────────────────────────────────
     local function restockColor(k)
+        local wasEmpty = map.data.colorsNb[k] == 0
         map.data.colorsNb[k] = map.data.colorsNb[k] + 1
         if textColorNb[k] then
             textColorNb[k].text = tostring(map.data.colorsNb[k])
+        end
+        if wasEmpty then
+            restorePaletteItem(k)
         end
     end
 
@@ -218,26 +223,28 @@ function scene:create(event)
     diffLabel.anchorX = 1
     diffLabel:setFillColor(unpack(C.sub))
 
-    -- Ligne 2 : restant / total (centrés)
+    -- Ligne 2 : restant / total
     local diffCount2 = pixCountTotal
     local diffCountText = display.newText({
         parent = sceneGroup, text = tostring(diffCount2),
         x = bubbleCX - 22, y = line2Y, font = native.systemFontBold, fontSize = 22,
     })
-    diffCountText.anchorX = 0.5   -- ancrage centré → scale depuis le milieu
+    diffCountText.anchorX = 0.5
+    diffCountText._baseX  = bubbleCX - 22   -- référence stable pour shake/pulse
     diffCountText:setFillColor(unpack(C.accent))
 
     local sepLabel = display.newText({
         parent = sceneGroup, text = "/",
         x = bubbleCX, y = line2Y, font = native.systemFontBold, fontSize = 18,
     })
+    sepLabel.anchorX = 0.5
     sepLabel:setFillColor(unpack(C.sub))
 
     local pixCountText = display.newText({
         parent = sceneGroup, text = tostring(pixCountTotal),
-        x = bubbleCX + 16, y = line2Y, font = native.systemFontBold, fontSize = 18,
+        x = bubbleCX + 8, y = line2Y, font = native.systemFontBold, fontSize = 18,
     })
-    pixCountText.anchorX = 0
+    pixCountText.anchorX = 0   -- aligné à gauche, bord gauche fixe après le "/"
     pixCountText:setFillColor(unpack(C.sub))
 
     -- Animation +1 flottant près du compteur restant
@@ -271,6 +278,7 @@ function scene:create(event)
             local marker = display.newRect(rect.x, rect.y, 3, 3)
             marker:setFillColor(1, 1, 1)
             rect.marker = marker
+            sceneGroup:insert(marker)
         end
     end
 
@@ -325,17 +333,20 @@ function scene:create(event)
                     if textColorNb[colorIndex] then
                         textColorNb[colorIndex].text = tostring(map.data.colorsNb[colorIndex])
                     end
+                    if map.data.colorsNb[colorIndex] == 0 then
+                        removePaletteItem(colorIndex)
+                    end
                 end
 
-                local prev = diffCount2
                 diffCount2 = countGridDifferences(grid, gridBlank)
                 diffCountText.text = tostring(diffCount2)
                 if not wasErase then
                     local normalCol = C.accent
-                    if diffCount2 < prev then
+                    -- Vérification directe : la couleur posée correspond-elle à la cible ?
+                    if grid[i][j] ~= 99 and gridBlank[i][j] == grid[i][j] then
                         animation.pulseText(diffCountText, 1.6, 140,
                             {0.22, 0.85, 0.40}, normalCol)  -- bonne action → vert
-                    elseif diffCount2 > prev then
+                    else
                         animation.shakeText(diffCountText,
                             {0.92, 0.22, 0.22}, normalCol)  -- mauvaise action → buzzer rouge
                     end
@@ -403,6 +414,91 @@ function scene:create(event)
     local itemsPerRow = math.max(1, math.floor((miniW + palSp) / palStepX))
     local palStartX   = offsetX + math.floor((miniW - (itemsPerRow - 1) * palStepX) / 2)
 
+    removePaletteItem = function(idx)
+        local sq = self.carreList[idx]
+        if not sq or sq._removed then return end
+        sq._removed = true
+
+        local nb    = textColorNb[idx]
+        local frame = sq.frameRect
+        local cx, cy = sq.x, sq.y
+        local color = colorMap[sq.colorValue] or {1, 1, 1}
+
+        if nb then nb.alpha = 0 end
+
+        local ball = display.newCircle(sceneGroup, cx, cy, palCellSize / 2)
+        ball:setFillColor(unpack(color))
+
+        sq.isHitTestable = false
+        if frame then
+            transition.to(frame, { time = 220, xScale = 0, yScale = 0, alpha = 0 })
+        end
+        transition.to(sq, {
+            time       = 220,
+            xScale     = 0,
+            yScale     = 0,
+            alpha      = 0,
+            transition = easing.inQuad,
+            onComplete = function()
+                transition.to(ball, {
+                    time       = 800,
+                    y          = cy - display.contentHeight,
+                    xScale     = 0.4,
+                    yScale     = 0.4,
+                    alpha      = 0,
+                    transition = easing.outQuad,
+                    onComplete = function() display.remove(ball) end,
+                })
+            end,
+        })
+    end
+
+    restorePaletteItem = function(idx)
+        local sq = self.carreList[idx]
+        if not sq or not sq._removed then return end
+
+        local nb    = textColorNb[idx]
+        local frame = sq.frameRect
+        local cx, cy = sq.x, sq.y
+        local color = colorMap[sq.colorValue] or {1, 1, 1}
+
+        -- Boule qui part du même endroit où elle a disparu (haut de l'écran)
+        local ball = display.newCircle(sceneGroup, cx, cy - display.contentHeight, palCellSize / 2)
+        ball:setFillColor(unpack(color))
+        ball.xScale = 0.4
+        ball.yScale = 0.4
+        ball.alpha  = 0
+
+        transition.to(ball, {
+            time       = 1400,
+            y          = cy,
+            xScale     = 1,
+            yScale     = 1,
+            alpha      = 1,
+            transition = easing.inQuad,
+            onComplete = function()
+                display.remove(ball)
+                -- La case et son cadre grandissent depuis le centre
+                sq.xScale = 0; sq.yScale = 0; sq.alpha = 1
+                sq.isHitTestable = true
+                sq._removed = false
+                if frame then
+                    frame.xScale = 0; frame.yScale = 0; frame.alpha = 1
+                    transition.to(frame, { time = 220, xScale = 1, yScale = 1, transition = easing.outBack })
+                end
+                transition.to(sq, {
+                    time       = 220,
+                    xScale     = 1,
+                    yScale     = 1,
+                    transition = easing.outBack,
+                    onComplete = function()
+                        if nb then nb.alpha = 1 end
+                    end,
+                })
+            end,
+        })
+    end
+
     for i = 1, #map.data.colors do
         local colorName = map.data.colors[i]
         local colorNb   = map.data.colorsNb[i]
@@ -419,6 +515,7 @@ function scene:create(event)
         carre.colorValue = colorName
         carre.index      = i
         sceneGroup:insert(carre)
+        carre.frameRect = frameRect
         table.insert(self.carreList, carre)
 
         if i == 1 then drawPixel = colorName end

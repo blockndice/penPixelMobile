@@ -1,5 +1,6 @@
 local M = {}
 
+-- TODO : ces bordures chaudes seront remplacées par une image ou un espace d'animation (décor, effets, mascotte...)
 local function drawHatchedBand(cx, cy, w, h, sceneGroup)
     if w <= 2 or h <= 2 then return end
 
@@ -8,7 +9,7 @@ local function drawHatchedBand(cx, cy, w, h, sceneGroup)
     container.y = cy
 
     local bg = display.newRect(0, 0, w, h)
-    bg:setFillColor(0, 0, 0)
+    bg:setFillColor(0.12, 0.09, 0.07)   -- bg sombre chaud
     container:insert(bg)
 
     local stripe = 14
@@ -16,14 +17,14 @@ local function drawHatchedBand(cx, cy, w, h, sceneGroup)
     for i = -total, total, stripe * 2 do
         local line = display.newLine(i, h / 2, i + h, -h / 2)
         line.strokeWidth = stripe
-        line:setStrokeColor(1, 1, 1)
+        line:setStrokeColor(0.50, 0.34, 0.17)   -- frame brun moyen
         container:insert(line)
     end
 
     local border = display.newRect(0, 0, w - 2, h - 2)
     border:setFillColor(0, 0, 0, 0)
     border.strokeWidth = 3
-    border:setStrokeColor(1, 1, 1)
+    border:setStrokeColor(0.50, 0.34, 0.17)   -- frame brun moyen
     container:insert(border)
 
     sceneGroup:insert(container)
