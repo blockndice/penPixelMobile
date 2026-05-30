@@ -92,7 +92,7 @@ function scene:create(event)
 
     local miniFrame = display.newRect(sceneGroup, miniCX, miniCY, miniW + 14, miniH + 14)
     miniFrame:setFillColor(unpack(C.frame))
-    miniFrame.strokeWidth = 2
+    miniFrame.strokeWidth = 4
     miniFrame:setStrokeColor(unpack(C.frameShad))
 
     local miniCanvas = display.newRect(sceneGroup, miniCX, miniCY, miniW, miniH)
@@ -142,27 +142,6 @@ function scene:create(event)
     local gridRight   = gridOffsetX + (cols - 1) * cellSize + cellSize / 2
     local gridTop     = gridOffsetY - cellSize / 2
     local gridBottom  = gridOffsetY + (rows - 1) * cellSize + cellSize / 2
-    local borderOffset = math.max(30, cellSize + 5)
-    local labelTopY   = gridTop - borderOffset - 14   -- au-dessus du repère de couleurs
-    local labelBotY   = gridBottom + 18               -- indicateur bas-droit
-
-    -- Nom (haut-gauche, au-dessus du repère)
-    local nameLabel = display.newText({
-        text = map.data.name, x = gridLeft, y = labelTopY,
-        font = native.systemFontBold, fontSize = 15,
-    })
-    nameLabel.anchorX = 0
-    nameLabel:setFillColor(unpack(C.title))
-    sceneGroup:insert(nameLabel)
-
-    -- Difficulté (haut-droit, au-dessus du repère)
-    local diffLabel = display.newText({
-        text = map.data.difficulty, x = gridRight, y = labelTopY,
-        font = native.systemFont, fontSize = 13,
-    })
-    diffLabel.anchorX = 1
-    diffLabel:setFillColor(unpack(C.sub))
-    sceneGroup:insert(diffLabel)
 
     -- ─── Compteurs ───────────────────────────────────────────────────────────
     local pixCountTotal = 0
@@ -174,34 +153,83 @@ function scene:create(event)
 
     local mSize  = cellMiniSize - 2
     local mHalf  = math.floor(mSize / 2)
-    -- Repères lignes : bande colorée à gauche de la mini-carte
     for i = 1, cellHauteur do
-        compass.randowX(offsetX - mHalf - 3, mSize, cellMiniSize, offsetY)
+        compass.randowX(offsetX - mHalf - 1, mSize, cellMiniSize, offsetY)
     end
-    -- Repères colonnes : bande colorée au-dessus de la mini-carte
     for i = 1, cellLargeur do
-        compass.randowY(offsetY - mHalf - 3, mSize, cellMiniSize, offsetX)
+        compass.randowY(offsetY - mHalf - 1, mSize, cellMiniSize, offsetX)
     end
 
-    -- Indicateurs pixel (bas-droit, horizontaux : restant #1 | total #2)
+    -- ─── Info-bulle (gauche, centrée entre palette et boutons) ─────────────
+    -- Pré-calcul du bas de la palette pour centrage vertical
+    local palCellSizeV  = 48
+    local palSpV        = 10
+    local palStepV      = palCellSizeV + palSpV
+    local palYV         = offsetY + cellHauteur * cellMiniSize + 55
+    local palItemsRow   = math.max(1, math.floor((miniW + palSpV) / palStepV))
+    local palNumRows    = math.ceil(#map.data.colors / palItemsRow)
+    local palBotY       = palYV + (palNumRows - 1) * palStepV + palCellSizeV / 2
+
+    local btnTopY       = (display.contentHeight - 28) - 52 / 2    -- haut des 4 boutons
+    local infoBubbleGap = 20                                         -- espace bulle ↔ boutons
+    local bubbleH       = 76
+    local bubbleW       = 190
+    local bubbleCX      = offsetX + miniW / 2
+    local bubbleCY      = palBotY + (btnTopY - infoBubbleGap - palBotY) / 2
+
+    -- Ombre
+    local bShadow = display.newRect(sceneGroup, bubbleCX + 3, bubbleCY + 3, bubbleW, bubbleH)
+    bShadow:setFillColor(0, 0, 0, 0.45)
+
+    -- Fond
+    local bPanel = display.newRect(sceneGroup, bubbleCX, bubbleCY, bubbleW, bubbleH)
+    bPanel:setFillColor(unpack(C.nav))
+    bPanel.strokeWidth = 3
+    bPanel:setStrokeColor(unpack(C.frame))
+
+    -- Marges intérieures
+    local padX   = bubbleCX - bubbleW / 2 + 10   -- bord gauche + padding
+    local padXR  = bubbleCX + bubbleW / 2 - 10   -- bord droit  - padding
+    local line1Y = bubbleCY - bubbleH / 2 + 18
+    local line2Y = line1Y + 32
+
+    -- Ligne 1 : Nom #N (gauche) | Difficulté (droite)
+    local nameNumLabel = display.newText({
+        parent = sceneGroup,
+        text = map.data.name .. "  #" .. map.num,
+        x = padX, y = line1Y, font = native.systemFontBold, fontSize = 16,
+    })
+    nameNumLabel.anchorX = 0
+    nameNumLabel:setFillColor(unpack(C.title))
+
+    local diffLabel = display.newText({
+        parent = sceneGroup, text = map.data.difficulty,
+        x = padXR, y = line1Y, font = native.systemFont, fontSize = 14,
+    })
+    diffLabel.anchorX = 1
+    diffLabel:setFillColor(unpack(C.sub))
+
+    -- Ligne 2 : restant / total (centrés)
     local diffCount2 = pixCountTotal
     local diffCountText = display.newText({
-        text = tostring(diffCount2),
-        x = gridRight - 48, y = labelBotY,
-        font = native.systemFontBold, fontSize = 18, align = "right",
+        parent = sceneGroup, text = tostring(diffCount2),
+        x = bubbleCX - 16, y = line2Y, font = native.systemFontBold, fontSize = 22,
     })
     diffCountText.anchorX = 1
     diffCountText:setFillColor(unpack(C.accent))
-    sceneGroup:insert(diffCountText)
+
+    local sepLabel = display.newText({
+        parent = sceneGroup, text = "/",
+        x = bubbleCX, y = line2Y, font = native.systemFontBold, fontSize = 18,
+    })
+    sepLabel:setFillColor(unpack(C.sub))
 
     local pixCountText = display.newText({
-        text = tostring(pixCountTotal),
-        x = gridRight, y = labelBotY,
-        font = native.systemFontBold, fontSize = 15, align = "right",
+        parent = sceneGroup, text = tostring(pixCountTotal),
+        x = bubbleCX + 16, y = line2Y, font = native.systemFontBold, fontSize = 18,
     })
-    pixCountText.anchorX = 1
+    pixCountText.anchorX = 0
     pixCountText:setFillColor(unpack(C.sub))
-    sceneGroup:insert(pixCountText)
 
     -- ─── État palette ────────────────────────────────────────────────────────
     local currentIndex  = 1
@@ -296,6 +324,20 @@ function scene:create(event)
         return true
     end
 
+    -- ─── Cadre grille vierge (même style que la mini-carte) ─────────────────
+    local gridCX = gridOffsetX + (cols - 1) * cellSize / 2
+    local gridCY = gridOffsetY + (rows - 1) * cellSize / 2
+    local gridFW = cols * cellSize
+    local gridFH = rows * cellSize
+
+    local gridShadow = display.newRect(sceneGroup, gridCX + 4, gridCY + 4, gridFW + 18, gridFH + 18)
+    gridShadow:setFillColor(0, 0, 0, 0.5)
+
+    local gridFrame = display.newRect(sceneGroup, gridCX, gridCY, gridFW + 14, gridFH + 14)
+    gridFrame:setFillColor(unpack(C.frame))
+    gridFrame.strokeWidth = 4
+    gridFrame:setStrokeColor(unpack(C.frameShad))
+
     -- ─── Grille interactive ──────────────────────────────────────────────────
     for i = 1, rows do
         self.gridRects[i] = {}
@@ -318,24 +360,26 @@ function scene:create(event)
     end
 
     -- ─── Compass grille principale ───────────────────────────────────────────
-    local borderOffset   = math.max(30, cellSize + 5)
+    -- strip2 = 7 : remplit exactement la largeur du cadre doré (7px de chaque côté)
+    local strip2         = 7
+    local borderOffset   = math.floor(cellSize / 2) + strip2
     local decalageHaut   = math.floor(cellSize * 0.5)
     local decalageGauche = math.floor(cellSize * 0.5)
     for i = 1, rows do
-        compass.randowX2(i, gridOffsetY, gridOffsetX - borderOffset, cellSize - 2, cellSize, decalageHaut)
+        compass.randowX2(i, gridOffsetY, gridOffsetX - borderOffset, cellSize - 2, cellSize, decalageHaut, strip2)
     end
     for j = 1, cols do
-        compass.randowY2(j, gridOffsetX, gridOffsetY - borderOffset, cellSize - 2, cellSize, decalageGauche)
+        compass.randowY2(j, gridOffsetX, gridOffsetY - borderOffset, cellSize - 2, cellSize, decalageGauche, strip2)
     end
 
-    -- ─── Palette de couleurs (grille avec retour à la ligne) ────────────────
+    -- ─── Cases de palette (grille avec retour à la ligne) ───────────────────
+    local palCellSize = 48                              -- taille indépendante de la grille
     local palSp       = 10
-    local palStepX    = cellSize + palSp
-    local palStepY    = cellSize + palSp
-    local palY        = offsetY + cellHauteur * cellMiniSize + 36
+    local palStepX    = palCellSize + palSp
+    local palStepY    = palCellSize + palSp
+    local palY        = offsetY + cellHauteur * cellMiniSize + 55
     local itemsPerRow = math.max(1, math.floor((miniW + palSp) / palStepX))
-    local rowWidth    = itemsPerRow * cellSize + (itemsPerRow - 1) * palSp
-    local palStartX   = offsetX + math.floor((miniW - rowWidth) / 2)
+    local palStartX   = offsetX + math.floor((miniW - (itemsPerRow - 1) * palStepX) / 2)
 
     for i = 1, #map.data.colors do
         local colorName = map.data.colors[i]
@@ -345,10 +389,10 @@ function scene:create(event)
         local px  = palStartX + col * palStepX
         local py  = palY + row * palStepY
 
-        local frameRect = display.newRect(sceneGroup, px, py, cellSize + 4, cellSize + 4)
+        local frameRect = display.newRect(sceneGroup, px, py, palCellSize + 4, palCellSize + 4)
         frameRect:setFillColor(unpack(C.frame))
 
-        local carre = display.newRect(px, py, cellSize, cellSize)
+        local carre = display.newRect(px, py, palCellSize, palCellSize)
         carre:setFillColor(unpack(colorMap[colorName]))
         carre.colorValue = colorName
         carre.index      = i
@@ -367,7 +411,7 @@ function scene:create(event)
 
         textColorNb[i] = display.newText({
             text = tostring(colorNb), x = px, y = py,
-            font = native.systemFontBold, fontSize = 13,
+            font = native.systemFontBold, fontSize = 17,
         })
         textColorNb[i]:setFillColor(1, 1, 1)
         sceneGroup:insert(textColorNb[i])
@@ -439,9 +483,9 @@ function scene:create(event)
     sceneGroup:insert(retourTxt)
 
     -- ─── Barre de boutons horizontal bas-gauche ──────────────────────────────
-    local btnY  = display.contentHeight - 24
-    local btnH  = 38
-    local btnSp = 8
+    local btnY  = display.contentHeight - 28
+    local btnH  = 52
+    local btnSp = 10
     local curX  = 16
 
     local function makeBtnPanel(w)
@@ -458,7 +502,7 @@ function scene:create(event)
     end
 
     local function addLabel(g, txt)
-        local t = display.newText({parent=g, text=txt, x=0, y=0, font=native.systemFontBold, fontSize=14})
+        local t = display.newText({parent=g, text=txt, x=0, y=0, font=native.systemFontBold, fontSize=22})
         t:setFillColor(unpack(C.navArrow))
         t.isHitTestable = false
         return t
@@ -466,12 +510,12 @@ function scene:create(event)
 
     -- Bouton Retour (icône maison)
     do
-        local g, panel = makeBtnPanel(44)
-        local roof = display.newPolygon(g, 0, -4, {-11, 6, 11, 6, 0, -8})
+        local g, panel = makeBtnPanel(54)
+        local roof = display.newPolygon(g, 0, -6, {-14, 8, 14, 8, 0, -10})
         roof:setFillColor(unpack(C.navArrow)); roof.isHitTestable = false
-        local body = display.newRect(g, 0, 6, 16, 11)
+        local body = display.newRect(g, 0, 7, 20, 13)
         body:setFillColor(unpack(C.navArrow)); body.isHitTestable = false
-        local door = display.newRect(g, 0, 9, 5, 5)
+        local door = display.newRect(g, 0, 11, 6, 7)
         door:setFillColor(unpack(C.nav)); door.isHitTestable = false
         panel:addEventListener("tap", onAbortDraw)
     end
@@ -479,7 +523,7 @@ function scene:create(event)
     -- Bouton Effacer
     local erasePanel
     do
-        local g, panel = makeBtnPanel(72)
+        local g, panel = makeBtnPanel(100)
         erasePanel = panel
         addLabel(g, "Effacer")
         panel:addEventListener("tap", function()
@@ -489,7 +533,7 @@ function scene:create(event)
 
     -- Bouton Soluce
     do
-        local g, panel = makeBtnPanel(72)
+        local g, panel = makeBtnPanel(100)
         addLabel(g, "Soluce")
         panel:addEventListener("tap", function()
             soluceButton:dispatchEvent({name = "tap"})
@@ -498,7 +542,7 @@ function scene:create(event)
 
     -- Bouton Fin (dev)
     do
-        local g, panel = makeBtnPanel(50)
+        local g, panel = makeBtnPanel(70)
         addLabel(g, "Fin")
         panel:addEventListener("tap", function()
             finishButton:dispatchEvent({name = "tap"})

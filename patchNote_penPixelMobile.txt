@@ -3,6 +3,7 @@ v0.00.1 -> Lancement
 v0.00.2 -> Update Interface
 v0.00.3 -> Refonte écran selectDraw
 v0.01.0 -> Refonte écran Draw
+v0.01.1 -> Repositionnement repère couleur + palette de couleur + info bulle
 
 
 EN COURS : Changement d'écran
